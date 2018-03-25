@@ -1,0 +1,91 @@
+﻿@model IEnumerable<KPMGNews.Models.News>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+    KPMGNews.Models.LoginData logindata = new KPMGNews.Models.LoginData(new HttpContextWrapper(HttpContext.Current));
+    string utype = logindata.usertype();
+}
+
+<h2>Index</h2>
+
+<p>
+    @{ 
+        if (utype.Equals("Publisher"))
+        {
+            @Html.ActionLink("Create New", "Create")
+        }
+    }
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Text)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.UserID)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.timestamp)
+        </th>
+        <th>
+            Likes
+        </th>
+
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Text)
+        </td>
+        <td>
+            @{
+                KPMGNews.Models.Model1 db = new KPMGNews.Models.Model1();
+                int cuid = item.UserID;
+                KPMGNews.Models.User usr = (from userss in db.Users
+                                            where (userss.UserID == cuid)
+                                            select userss).FirstOrDefault();
+                string cur_usr = usr.Login;
+
+            }
+            @Html.Raw(cur_usr)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.timestamp)
+        </td>
+        <td>
+            @{
+                int l = db.Likes.Where(a => (a.NewsID == item.NewsID)).Count();
+                cuid = Convert.ToInt32(logindata.UserID);
+                int luser = db.Likes.Where(a => (a.NewsID == item.NewsID) && (a.UserID == cuid)).Count();
+            }
+            @Html.Raw(l.ToString())
+        </td>
+
+        <td>
+            @{
+                if (utype.Equals("Publisher"))
+                {
+
+                    @Html.ActionLink("Edit", "Edit", new { id = item.NewsID })
+                    @Html.Raw(" | ");
+                    @Html.ActionLink("Delete", "Delete", new { id = item.NewsID })
+                    @Html.Raw(" | ");
+                }
+            }
+            @Html.ActionLink("Comments", "Details", new { id = item.NewsID }) |
+            @{
+                if (luser <= 0)
+                {
+                    @Html.ActionLink("Like", "Create", "Likes", new { NewsID = item.NewsID }, null)
+                }
+            } |
+        </td>
+    </tr>
+}
+
+</table>

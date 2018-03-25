@@ -1,0 +1,111 @@
+﻿@model KPMGNews.Models.News
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    KPMGNews.Models.LoginData logindata = new KPMGNews.Models.LoginData(new HttpContextWrapper(HttpContext.Current));
+    string utype = logindata.usertype();
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>News</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Text)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Text)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.UserID)
+        </dt>
+
+        <dd>
+
+            @{
+                KPMGNews.Models.Model1 db = new KPMGNews.Models.Model1();
+                int cuid = Model.UserID;
+                KPMGNews.Models.User usr = (from userss in db.Users
+                                            where (userss.UserID == cuid)
+                                            select userss).FirstOrDefault();
+                string cur_usr = usr.Login;
+
+            }
+            @Html.Raw(cur_usr)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.timestamp)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.timestamp)
+        </dd>
+
+
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Add Comment", "Create", "Comments", new { NewsID = Model.NewsID }, null) |
+    @{
+        if (utype.Equals("Publisher"))
+        {
+            @Html.ActionLink("Edit", "Edit", new { id = Model.NewsID })
+            @Html.Raw(" | ");
+        }
+    } 
+    @Html.ActionLink("Back to List", "Index")
+    </p>
+
+
+@{
+    //KPMGNews.Models.Model1 db = new KPMGNews.Models.Model1();
+    int newsid = Model.NewsID;
+    List<KPMGNews.Models.Comments> comments_list = (from comments in db.Comments
+                                                    where (comments.NewsID == newsid)
+                                                    select comments).ToList();
+}
+
+<div>
+    <dl class="dl-horizontal">
+
+        @{
+        foreach (KPMGNews.Models.Comments cmt in comments_list)
+        {
+            @Html.Raw("<dt>Text");
+            @Html.Raw("</dt>");
+            @Html.Raw("<dd>");
+            @Html.Raw(cmt.Text);
+            @Html.Raw("</dd>");
+    
+            @Html.Raw("<dt>User");
+            @Html.Raw("</dt>");
+            @Html.Raw("<dd>");
+
+                cuid = cmt.UserID;
+                KPMGNews.Models.User usrn = (from userss in db.Users
+                                            where (userss.UserID == cuid)
+                                            select userss).FirstOrDefault();
+                cur_usr = usrn.Login;
+
+
+            @Html.Raw(cur_usr);
+            @Html.Raw("</dd>");
+
+            @Html.Raw("<dt>Date/Time");
+            @Html.Raw("</dt>");
+            @Html.Raw("<dd>");
+            @Html.Raw(cmt.timestamp);
+            @Html.Raw("</dd><br/>");
+}
+        }
+
+    </dl>
+</div>
